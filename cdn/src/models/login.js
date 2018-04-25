@@ -13,12 +13,13 @@ export default {
   effects: {
     *login({ payload }, { call, put }) {
       const response = yield call(fakeAccountLogin, payload);
+      // console.log({response})
       yield put({
         type: 'changeLoginStatus',
         payload: response,
       });
       // Login successfully
-      if (response.status === 'ok') {
+      if (response.success) {
         reloadAuthorized();
         yield put(routerRedux.push('/'));
       }
@@ -47,10 +48,20 @@ export default {
 
   reducers: {
     changeLoginStatus(state, { payload }) {
-      setAuthority(payload.currentAuthority);
+      if (payload.success) {
+        let arr = payload.model.split('.');
+        let data = JSON.parse(atob(arr[1]));
+        let user = {
+          user: data.sub,
+          expire: data.exp || 0,
+          accessToken: payload.model,
+        };
+      }
+      setAuthority(payload.model);
+      // console.log({payload})
       return {
         ...state,
-        status: payload.status,
+        status: payload.success,
         type: payload.type,
       };
     },

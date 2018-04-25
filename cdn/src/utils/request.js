@@ -2,7 +2,8 @@ import fetch from 'dva/fetch';
 import { notification } from 'antd';
 import { routerRedux } from 'dva/router';
 import store from '../index';
-
+import {config} from '../config'
+console.log(config('request.subSystem'))
 const codeMessage = {
   200: '服务器成功返回请求的数据。',
   201: '新建或修改数据成功。',
@@ -63,7 +64,11 @@ export default function request(url, options) {
       };
     }
   }
-
+  const subSystem = config('request.subSystem')
+  
+  if(!/api/.test(url)){
+    url = [subSystem, url].join('')
+  }
   return fetch(url, newOptions)
     .then(checkStatus)
     .then(response => {
